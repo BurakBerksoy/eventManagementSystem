@@ -1,0 +1,144 @@
+NavBar
+***************************
+1.Kullanıcı giriş yapmamış ise eğer navbar'da gözükecek olan butonlar
+    1.Ana Sayfa
+    2.Hakkımızda
+
+2.Kullanıcı eğer giriş yapmış ise navbar'da gözükecek olan butonlar
+    1.Etkinlikler
+    2.Kulüpler
+    3.Öğrenciler
+
+3.Navbar en solunda EYS yazıyor onu değiştir onun yerine YEB yaz
+
+4.Navbar top 0 olmalı yani mesela aşağıya doğru indiğim zaman navbarda aşağıya doğru inmesi lazım modern navbarlar gibi
+
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+Ana Sayfa
+***************************
+1.Etkinlikler sayfasında
+    -En yeni 3 etkinlikle değiştirilecek
+
+2.Neden Bizi Seçmelisiniz kısmında
+    -Bilet Yönetimi ve Kolay Katıl kaldırılacak onun yerine 2 tane birşey eklenecek
+
+3.Etkinlik Yönetiminde Yeni Nesil Dönem
+    -O kısım kaldırılacak onun yerine başka birşey konulabilir
+
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+Etkinlikler
+****************************
+
+1.Etkinlikler Sayfasıda Otomotik etkinlik ekleme
+    -Bir kulüp başkanı giriş yaptı daha sonrasında eğer bir etkinlik ekler ise o etkinlik
+     otomotik olarak buraya düşecek
+    
+    -Etkinlik altında Like ve Dislike butonları olucak ve Etkinliğe Katıl butonu olucak
+
+    -Doluluk oranı gözükecek
+
+    -Bir kullanıcı doluluk oranına bastığı zaman önüne bir popap açılır ve orada katılacakların listesi gözükür
+
+2.Tasarımı daha güzel olucak
+
+
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$4
+
+
+Kulüpler
+****************************
+
+1.Kulüp de Başkan girer ise
+    -Eğer bir başkan girer ise Yönetim Paneli olucak yönetim panelinde olacak olan butonlar
+
+        1.Raporlar
+        2.Afişler
+        3.Etkinlik Oluşturma
+             
+             *****************************************
+                
+                Raporlar : Raporlar sayfasını başkan, admin ve raporcu görebilecek başka birisi göremiyecek
+                           raporlar sayfasında sağ üstte raporcu rolüne sahip olan kişi rapor oluşturuğ rapor yazıcak ve gönder tuşuna
+                           bastığı zaman raporlar kısmında oluşacak 
+
+                           Rapor Yazma Kısmında Olan Özellikler
+
+                           ************************************
+
+                           1.Yazı Büyüklük Seçme
+                           2.Yazı Renk Seçme 
+                           3.Yazı Yazı Tipini Değiştirme 
+                           4.Resim Yükleme 
+                           5.Kare Oluşturma 
+                           6.Daire Oluşturma 
+                
+
+                ===============================================================================================================================
+
+
+                Afişler : Afişler kısmında bu sayfayı sadece başkan, admin ve dijital tasarımcı rolüne sahip olan kişiler görebilir
+                          bu sayfaya tıkladınğı zaman bu zaman kadar yüklenmiş afişler ve sağ üstte afiş yükle kısmı olucak o kısma
+                          tıkladınğı zaman bilgisayar dosya seçip oraya yüklenecek
+                
+
+                ===============================================================================================================================
+
+
+
+                Etkinlik Oluşturma : Etkinlik Oluşturmayı sadece Başkan ve Admin olan kişi oluşturabilir başkan veya admin o butona tıkladığı
+                                     zaman kullanıcının önüner bir popap açılır ve orada kulüp oluşturmak için bilgiler girilir
+                                     
+
+                                     *********************************************************************************************************
+
+                                     Bilgiler
+
+                                     1.Etkinlik Adı 
+                                     2.Etkinlik Açıklaması
+                                     3.Etkinlik Fikir Sahibi (Bu kısımda kulüp üyelerinden biri seçilmek zorunda)
+                                     4.Etkinlik Konteynjan
+                                     5.Kaçıncı Etkinlik Saati
+                                     6.Tarih
+                                     7.İkram
+                                     8.Mekan
+                                     9.Konuşmacılar
+                                     10.Etkinlik Afişler
+
+                    NOT : Etkinlil Oluşturulduğu anda otomotik olarak Etknlikler sayfasında gözükecek card gibi ve etkinliğe katıl butonu olucak
+
+
+                ========================================================================================================================================
+
+
+                Muhasebe : Muhasebe ekranını sadece başkan, admin ve muhasebeci rolüne sahip olan kullanıcı görebilecek sanal post üzerinden 
+                           para atılıp para çekilebilecek sanal olarak
+
+                           *****************************************************************************************************************
+
+                           Sanal Post Makinesi 
+
+                           1.Para Yatır butonu
+                           2.Para Çek butonu
+                           3.Toplam Param
+                           4.Geçmiş Özetim ( Ne zaman Para Çektim Ne Zaman Para Yatırdım)
+                           5.IBAN
+                     
+
+2.Tasarım çocuksu gibi daha modern ve profeyonel olması lazım
+
+3.Kulüp detaylarına bakıldığı zaman başkan adı gözükmüyor
+
+4.Bir admin giriş yapar ise admin kulüp silebilir ve kulüp düzenleyebilir
+
+5.Kulübe Katıl butonu çalışmıyor Bu Butona Basıldığı Zaman Kulüp Başkanına Bildirim Gidecek Ve Bildirim Yanında 2 Tane Buton olucak
+
+    -Kabul Et : Eğer Kabul eder İse Kullanıcı Kulübe Dahil Olur  
+    -Reddet : Reddet Eder İse Kullanıcı o Kulübe Katılamaz
+
+
+6.
+
+

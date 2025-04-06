@@ -1,0 +1,418 @@
+# ETKİNLİK YÖNETİM SİSTEMİ - GELİŞTİRİLMİŞ ALGORİTMA
+
+## 1. UYGULAMA GENEL YAPISI
+------------------------
+Bu uygulama, üniversite/okul etkinliklerinin yönetimi için geliştirilmiş kapsamlı bir web platformudur. Sistem, öğrencilerin, kulüplerin ve yöneticilerin etkinlikleri organize etmesine, katılmasına ve takip etmesine olanak sağlar.
+
+## 2. KULLANICI TİPLERİ VE YETKİLERİ
+--------------------------------
+
+### a) Öğrenciler
+- Etkinliklere katılabilir
+- Kulüplere üye olabilir
+- Profilini düzenleyebilir
+- Etkinlik geçmişini görüntüleyebilir
+- Sertifikalarını görüntüleyebilir ve paylaşabilir
+- Etkinliklere geri bildirim verebilir
+- Kulüp duyurularını takip edebilir
+
+### b) Kulüp Yöneticileri ve Rolleri
+
+#### 1. Başkan
+- Kulüp üyelerini yönetebilir (ekleme/çıkarma)
+- Üye rollerini atayabilir/değiştirebilir
+- Etkinlik oluşturabilir, düzenleyebilir ve silebilir
+- Kulüp duyuruları yayınlayabilir
+- Kulüp istatistiklerini görüntüleyebilir
+- Kulüp ayarlarını yönetebilir
+- Başkanlık görevinden ayrılma durumunda yeni başkan seçimi sürecini başlatabilir
+
+#### 2. Muhasebeci
+- Kulüp bütçesini yönetebilir
+- Gelir-gider kayıtlarını tutabilir
+- Fatura ve belgeleri sisteme yükleyebilir
+- Bütçe raporları oluşturabilir
+
+#### 3. Dış İlişkiler Sorumlusu
+- Sponsor yönetimini yapabilir
+- Etkinlik mekanlarını yönetebilir
+- Üniversite yönetimi ile iletişimi yönetebilir
+
+#### 4. İkram Sorumlusu
+- Etkinlik ikramlarını planlayabilir
+- Tedarikçi yönetimini yapabilir
+- Stok takibini yapabilir
+
+#### 5. Dijital Tasarım Sorumlusu
+- Etkinlik afişlerini yönetebilir
+- Sosyal medya içeriklerini hazırlayabilir
+- Grafik kütüphanesini yönetebilir
+
+#### 6. Raporcu
+- Etkinlik raporları oluşturabilir
+- Katılım analizlerini yapabilir
+- Geri bildirimleri değerlendirebilir
+
+### c) Sistem Yöneticileri
+- Tüm sistemi yönetebilir
+- Kullanıcıları yönetebilir (GDPR uyumlu)
+- Kulüpleri yönetebilir
+- Sistem ayarlarını yapabilir
+- Raporları görüntüleyebilir
+- Güvenlik politikalarını belirleyebilir
+- Yedekleme ve geri yükleme işlemlerini yapabilir
+
+## 3. UYGULAMA SAYFALARI VE İŞLEVLERİ
+---------------------------------
+
+### a) Giriş/Kayıt Sayfaları
+
+#### Giriş Sayfası
+- E-posta/Öğrenci No ile giriş
+- Şifre ile giriş
+- "Beni Hatırla" seçeneği
+- Şifremi Unuttum linki
+- Kayıt Ol linki
+- İki faktörlü doğrulama seçeneği
+
+#### Kayıt Sayfası
+- Öğrenci bilgileri formu
+- E-posta doğrulama sistemi:
+  * Kayıt sonrası doğrulama kodu gönderimi
+  * 24 saat geçerli doğrulama linki
+  * SMS alternatifi (opsiyonel)
+  * Doğrulama süresi dolduğunda yeniden kod gönderimi
+- Şifre oluşturma (güvenlik kriterleri):
+  * Minimum 8 karakter
+  * Büyük/küçük harf zorunluluğu
+  * Sayı ve özel karakter zorunluluğu
+- Kullanım şartları onayı
+- KVKK/GDPR uyumlu veri işleme izni
+
+### b) Ana Sayfa
+
+#### Üst Banner
+- Öne çıkan etkinlikler slider'ı
+- Her etkinlik için:
+  * Görsel
+  * Başlık
+  * Kısa açıklama
+  * Tarih ve saat
+  * Konum
+  * Katılımcı sayısı
+  * "Detayları Gör" butonu
+
+#### Yaklaşan Etkinlikler
+- Sonraki 5 etkinlik
+- Her etkinlik için:
+  * Tarih ve saat
+  * Etkinlik adı
+  * Konum
+  * Katılımcı sayısı
+  * Kapasite durumu
+  * "Katıl" butonu
+  * Kapasite dolduğunda "Bekleme Listesine Katıl" seçeneği
+
+#### Popüler Kulüpler
+- En aktif 4 kulüp
+- Her kulüp için:
+  * Logo
+  * İsim
+  * Üye sayısı
+  * Aktif etkinlik sayısı
+  * "İncele" butonu
+
+#### İstatistikler
+- Toplam etkinlik sayısı
+- Aktif kulüp sayısı
+- Toplam katılımcı sayısı
+- Başarılı etkinlik sayısı
+- Aylık/yıllık trend grafikleri
+
+### c) Etkinlikler Sayfası
+
+#### Filtreleme Bölümü
+- Tarih aralığı seçimi
+- Kategori filtresi
+- Kulüp filtresi
+- Arama kutusu
+- Gelişmiş filtreleme seçenekleri:
+  * Kapasite durumu
+  * Ücretli/ücretsiz
+  * Konum bazlı
+
+#### Etkinlik Listesi
+- Grid görünümü
+- Her etkinlik kartında:
+  * Görsel
+  * Başlık
+  * Tarih
+  * Konum
+  * Katılımcı sayısı
+  * Kategori etiketi
+  * Kapasite durumu
+  * "Detayları Gör" butonu
+
+#### Etkinlik Detay Sayfası
+- Etkinlik bilgileri
+- Katılım formu:
+  * Kişisel bilgiler
+  * Özel gereksinimler
+  * Diyet kısıtlamaları
+- Konum haritası
+- Katılımcı listesi
+- Sertifika bilgisi:
+  * Benzersiz sertifika kodu
+  * QR kod
+  * Doğrulama linki
+- Etkinlik programı
+- İletişim bilgileri
+- Geri bildirim formu
+
+### d) Kulüpler Sayfası
+
+#### Kulüp Listesi
+- Her kulüp için kart
+- Kartlarda:
+  * Logo
+  * İsim
+  * Açıklama
+  * Üye sayısı
+  * Aktif etkinlik sayısı
+  * "İncele" butonu
+
+#### Kulüp Detay Sayfası
+- Kulüp bilgileri
+- Üyeler listesi:
+  * Rol bazlı görünüm
+  * Üye profilleri
+  * Üyelik tarihleri
+- Etkinlikler:
+  * Geçmiş etkinlikler
+  * Gelecek etkinlikler
+  * Etkinlik istatistikleri
+- Duyurular:
+  * Genel duyurular
+  * Üye duyuruları
+  * Önemli bildirimler
+- Üyelik başvuru formu:
+  * Kişisel bilgiler
+  * Motivasyon mektubu
+  * Deneyimler
+  * Referanslar
+
+### e) Profil Sayfası
+
+#### Kişisel Bilgiler
+- Profil fotoğrafı
+- İsim ve soyisim
+- Öğrenci numarası
+- Bölüm bilgisi
+- İletişim bilgileri
+- Sosyal medya bağlantıları
+- Gizlilik ayarları
+
+#### Etkinlik Geçmişi
+- Katıldığım etkinlikler:
+  * Tarih
+  * Etkinlik adı
+  * Katılım durumu
+  * Sertifika durumu
+- Düzenlediğim etkinlikler:
+  * Rol
+  * Sorumluluklar
+  * Başarı metrikleri
+- Sertifikalar:
+  * Sertifika kodu
+  * QR kod
+  * Doğrulama linki
+  * Paylaşım seçenekleri
+
+#### Kulüp Üyelikleri
+- Aktif üyelikler:
+  * Kulüp adı
+  * Rol
+  * Üyelik tarihi
+  * Sorumluluklar
+- Geçmiş üyelikler:
+  * Kulüp adı
+  * Dönem
+  * Katkılar
+  * Başarılar
+
+## 4. UYGULAMA ÖZELLİKLERİ
+----------------------
+
+### a) Bildirim Sistemi
+
+#### E-posta Bildirimleri
+- Kayıt doğrulama
+- Etkinlik hatırlatmaları
+- Kulüp duyuruları
+- Üyelik onayları
+- Sertifika hazır bildirimleri
+- Özel davetler
+
+#### Sistem İçi Bildirimler
+- Anlık bildirimler:
+  * Etkinlik güncellemeleri
+  * Üyelik durumu değişiklikleri
+  * Yeni duyurular
+- Zamanlanmış bildirimler:
+  * Etkinlik hatırlatmaları
+  * Görev hatırlatmaları
+  * Rapor tarihleri
+- Bildirim tercihleri:
+  * Bildirim türü seçimi
+  * Bildirim sıklığı
+  * Sessiz saatler
+
+### b) Raporlama
+
+#### Etkinlik İstatistikleri
+- Katılım oranları
+- Geri bildirim analizleri
+- Başarı metrikleri
+- Maliyet analizleri
+
+#### Katılım Raporları
+- Öğrenci bazlı katılımlar
+- Kulüp bazlı katılımlar
+- Dönemsel karşılaştırmalar
+- Trend analizleri
+
+#### Kulüp Performans Raporları
+- Etkinlik sayıları
+- Üye sayıları
+- Bütçe durumu
+- Hedef gerçekleşme oranları
+
+#### Öğrenci Katılım İstatistikleri
+- Kişisel katılım geçmişi
+- Kulüp üyelikleri
+- Sertifika kazanımları
+- Başarı puanı
+
+### c) Güvenlik
+
+#### Kullanıcı Kimlik Doğrulama
+- İki faktörlü doğrulama
+- Oturum yönetimi
+- IP bazlı güvenlik
+- Şüpheli aktivite tespiti
+
+#### Şifre Sıfırlama
+- E-posta doğrulama
+- SMS doğrulama
+- Güvenlik soruları
+- Geçici şifre sistemi
+
+#### Oturum Yönetimi
+- Otomatik oturum sonlandırma
+- Aktif oturum takibi
+- Cihaz yönetimi
+- Güvenli çıkış
+
+#### Yetkilendirme Kontrolleri
+- Rol bazlı erişim kontrolü
+- İşlem logları
+- Yetki değişiklik takibi
+- Güvenlik uyarıları
+
+## 5. TEKNİK DETAYLAR
+-----------------
+
+### c) Veritabanı Yapısı
+
+#### Kullanıcı Tablosu
+- Kullanıcı ID
+- Ad Soyad
+- E-posta
+- Şifre (hash)
+- Öğrenci No
+- Bölüm
+- Rol
+- Durum
+- Oluşturma Tarihi
+- Güncelleme Tarihi
+- Son Giriş Tarihi
+
+#### Kulüp Tablosu
+- Kulüp ID
+- Ad
+- Açıklama
+- Logo
+- Kuruluş Tarihi
+- Durum
+- Başkan ID
+- İletişim Bilgileri
+
+#### Etkinlik Tablosu
+- Etkinlik ID
+- Başlık
+- Açıklama
+- Tarih
+- Konum
+- Kapasite
+- Katılımcı Sayısı
+- Durum
+- Kulüp ID
+- Oluşturan ID
+
+#### Katılım Tablosu
+- Katılım ID
+- Etkinlik ID
+- Kullanıcı ID
+- Durum
+- Kayıt Tarihi
+- Onay Tarihi
+- İptal Tarihi
+- Geri Bildirim
+
+#### Sertifika Tablosu
+- Sertifika ID
+- Etkinlik ID
+- Kullanıcı ID
+- Kod
+- Oluşturma Tarihi
+- Geçerlilik Tarihi
+- Durum
+
+#### Bildirim Tablosu
+- Bildirim ID
+- Kullanıcı ID
+- Başlık
+- İçerik
+- Tür
+- Durum
+- Oluşturma Tarihi
+- Okunma Tarihi
+
+## 6. UYGULAMA FAYDALARI
+--------------------
+- Etkinliklerin organize yönetimi
+- Artan katılım oranları
+- Verimli kulüp aktiviteleri
+- Kolay öğrenci katılımı
+- Hızlı yönetim süreçleri
+- Detaylı raporlama imkanı
+- Güvenli veri yönetimi
+- Ölçülebilir başarı metrikleri
+
+## 7. GELİŞTİRME SÜRECİ
+-------------------
+- Analiz ve Tasarım: 2 hafta
+- Frontend Geliştirme: 6 hafta
+- Backend Geliştirme: 4 hafta
+- Test ve Optimizasyon: 2 hafta
+- Toplam Süre: 3-4 ay
+
+## 8. MALİYET
+----------
+- Yazılım Geliştirme
+- Sunucu Maliyetleri
+- Bakım ve Destek
+- Eğitim ve Dokümantasyon
+- Güvenlik Sertifikaları
+- Yedekleme Sistemleri
+- Monitoring Araçları 

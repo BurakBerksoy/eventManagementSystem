@@ -1,0 +1,123 @@
+.two-factor-setup-card {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.two-factor-setup-step {
+  margin-top: 24px;
+}
+
+.qr-code-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 240px;
+  background-color: #f0f2f5;
+  border-radius: 8px;
+  padding: 20px;
+  border: 1px dashed #d9d9d9;
+}
+
+.secret-key-container {
+  margin-top: 24px;
+}
+
+.verification-form {
+  max-width: 300px;
+  margin: 24px auto;
+}
+
+.navigation-buttons {
+  margin-top: 24px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.backup-codes-container {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #e8e8e8;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.backup-code {
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 4px;
+  padding: 8px 12px;
+  text-align: center;
+  border: 1px solid #d9d9d9;
+}
+
+.backup-codes-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  justify-content: flex-start;
+}
+
+.backup-codes-modal-content {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.backup-code-item {
+  text-align: center;
+  background-color: #f5f5f5;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+  .backup-codes-container {
+    padding: 12px;
+  }
+  
+  .backup-codes-modal-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .navigation-buttons {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+  
+  .navigation-buttons button {
+    width: 100%;
+  }
+}
+
+/* Kimlik doğrulama ekranı için stil */
+.two-factor-verify-card {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.verify-otp-input {
+  display: flex;
+  justify-content: center;
+  margin: 24px 0;
+}
+
+.verify-otp-input input {
+  font-size: 24px;
+  width: 40px !important;
+  height: 40px;
+  text-align: center;
+  margin: 0 4px;
+}
+
+.two-factor-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 24px;
+}
+
+.use-backup-code-section {
+  margin-top: 20px;
+  text-align: center;
+} 

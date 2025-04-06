@@ -1,0 +1,27 @@
+1. Register bölümünde öğrenci numarası ve meslek seçme bölümü var onları kaldır
+
+2. Ana sayfanın altına bir footer koy
+
+NOT : EĞER BİR ADMİN GİRİŞ YAPARSA HEREŞEYE YETKİSİ OLUR HERŞEYE KARIŞABİLİR ADMİN UYGULAMANIN EN ÖNEMLİ KİŞİSİDİR
+Admin Hesaplar : 
+
+1.E-posta : berksoyburak5@gmail.com
+  şifre : 59u3bd5050
+
+2.E-posta : kemalözcan@gmail.com
+  şifre : ERHYWQPO
+
+bu iki hesap admindir bu kişiler giriş yaparsa herşeye yetkisi olur
+
+3. Kullanıcılar sayfasında eğer bir admin giriş yaptıysa bir kullanıcıya tıkladığı zaman kullanıcılar bilgileri gelir sayfaya daha sağ üstte rol kısmı olur admin olan kişi kullanıcıya başkan yapabilir sadece başkanda değil bir kulübün herhangi bir rolünü yapabilir admin olan kişi kullanıcı silebilir admin olan kişi kullanıcı düzenleyebilir
+
+4. Kulüpler sayfasında eğer bir admin giriş yaptıysa kulüpler sayfasına tıkladığı zaman sol üstte bir buton olur kulüp ekle ona tıkladığı zaman sonra byük bir popap açılır o popapda şunlar olur
+
+1.Kulüp Adı
+2.Kulüp Logosu
+3.Kulüp Açıklaması
+4.Kulüp max üye sayısı
+5.Kulüp başkanı (Kullanıcı bu kısımda kullanıcılardan birini seçicek)
+6.Kulüp açılma tarihi
+
+admin olan kişi bunları girer ve kulüp oluşturulmuş olur ve db ye kaydedilir taki admin olan kişi kulübü silene kadar daha sonra admin olan kişi kulüpleri düzenleyebilir kulüplerden üye çıkarabilir üye rolü değiştirebilir kulübün hereşeyini değiştirebilir

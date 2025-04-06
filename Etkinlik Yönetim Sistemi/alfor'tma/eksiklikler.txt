@@ -1,0 +1,20 @@
+1.Ana sayfadaki herşeyi kaldır sadece navbar ve footer olsun
+
+2.Navbar da 3 tane buton var Etkinlikler Kulüpler Mekanlar Mekanlar butonunu kaldır onun yerine öğrenciler olsun ve kayıtlı olan tüm kullanıcılar orada sıralansın ve bir kullanıcıya tıkladığım zaman onun hesabını görebileyim
+
+3.Kulüpler kısmında kulüp ara ve kategori kısmını kaldır zaten sadece 6 tane kulüp olucak daha sonra kulüplerde 121 üye 3 etkinlik falan cesayre yalan bir bilgi yazio onları kaldır daha sonra sosyal medya iconları var onlarıda kaldır daha sonra kulüplerin yanında Teknoloji Sana gibi vesayre şeyler yazio kategorisi heralde onlarıda kaldır en altta Kulüp üyeliği hakkında kısmı var onu kaldır footer koy
+
+4.Bir kulübe tıklandığı zaman üye sayısı yazıyor onu kaldır sonra altta butonlar var Hakkonda Etkinlikler Üyeler Sponsorlar Bütçe bunları senle düzenleyelim
+
+Hakkında : Bu kısımda kulübün açıklaması olsun eğitime yönelik açıklamalar olsun daha sonra resimler olsun hakkında kısmında
+
+Etkinlikler : Burada şöyle olsun öncelikle burada etkinlikler var onu kaldır bir tane etkinlik ekle butonu olsun ama bu buton sadece kulüp başkanında gözüksün kulübün üyesi veya başka biri etkinlik oluşturamaz neyse etkinlik ekle butonu olsun o buyona tıkladığı zaman önüne bir tane popap açılsın daha sonra orada sırası ile [Etkinlik adı, Etkinlik açıklama, Fikir Sahibi(kulüp üyeleri arasında bu fikir kimden çıktı), katılacak üye sayısı ve afiş kullanıcı burada bir tane dosya seçicek bir afiş daha sonra oluştur düğmesine bastığı zaman ana sayfaya otomotik olarak etkinlik olarak gidecek ve o kulübün etkinlikler sayfasındada gözükecek]
+
+Üyeler : Üyeler kısmında öncelikle 3 tane kişi var onların hepsini kaldır daha sonra üyeler otomotik olarak rol atanamaz sistem yöneticisi başkan seçer başkanda diğer üylere rol verir roller şunlardır
+
+başkan : kulübün sorumlusudur herşey elinin altındandır etkinlik oluşturabilir üyelerin rollerini değiştirebilir
+muhasebeci : kulübün maddisel kısmı ile ilgilenir mesela bir etkinlik yapılacak onun için para toplancak muhasebeci o parayı toplar
+sekreter : kulüp toplandığı zaman yani kulüp toplantısı yağıldığı zaman rapor yazan kişidir gelişmeleri ne yapılacakları şu etkinlik nasıl olucak vesayre herşeyi yazar 
+dış hizmetler : mesela bir etkinlik yapılacak dışaradan bir uzaman çağrılması gerekiyor ozaman dış hizmeler sorumlusu olan kişi o kişi bulmakla mükelleftir
+ikram : mesela bir etkinlik yapılcak ve etkinlik sonunda ikram olucak ikram rolünde olan arkadaş ikram malzemeleri almada ikram hazırlamada servis etmede mükelleftir
+dijital tasarımcı : bu rolde olan kişi mesela bir etkinlik yapılacak bu kişi o etkinliğin afişini yapmakla mükelleftir daha sonra o yaptığı afişi kulüp başkanına atar kulüp başkadına etkinlik oluştaracağı zaman afiş ekleyeceği zaman bu afişi ekler

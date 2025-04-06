@@ -1,0 +1,6 @@
+<svg width="128" height="36" viewBox="0 0 128 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="36" height="36" rx="8" fill="#4F46E5"/>
+  <path d="M18 8L26 20H10L18 8Z" fill="white"/>
+  <path d="M18 28L10 16H26L18 28Z" fill="#A5B4FC"/>
+  <text x="44" y="24" font-family="Arial" font-weight="bold" font-size="16" fill="#333333">EtkinlikYS</text>
+</svg> 

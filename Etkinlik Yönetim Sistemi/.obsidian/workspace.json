@@ -1,0 +1,176 @@
+{
+  "main": {
+    "id": "a0193af5a5fead5b",
+    "type": "split",
+    "children": [
+      {
+        "id": "713e522b4aae3d95",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "c9e76bfe15810941",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "ETKİNLİK YÖNETİM SİSTEMİ - DETAYLI UYGULAMA ALGORİTMASI.md",
+                "mode": "preview",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "ETKİNLİK YÖNETİM SİSTEMİ - DETAYLI UYGULAMA ALGORİTMASI"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "f8f675652847f39b",
+    "type": "split",
+    "children": [
+      {
+        "id": "4482e6d0c317cf69",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "8f2313eb6ffd3481",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "1a4797e4ab525835",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "cab8c05b32caef42",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "c31794dc09e6e63a",
+    "type": "split",
+    "children": [
+      {
+        "id": "b8122e0b181c5f42",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "bd4ea370b97da48d",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "ETKİNLİK YÖNETİM SİSTEMİ - DETAYLI UYGULAMA ALGORİTMASI.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for ETKİNLİK YÖNETİM SİSTEMİ - DETAYLI UYGULAMA ALGORİTMASI"
+            }
+          },
+          {
+            "id": "561030e3b216af2d",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "ETKİNLİK YÖNETİM SİSTEMİ - DETAYLI UYGULAMA ALGORİTMASI.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from ETKİNLİK YÖNETİM SİSTEMİ - DETAYLI UYGULAMA ALGORİTMASI"
+            }
+          },
+          {
+            "id": "3654fa48d3adbe8d",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "ac6c10319ba52987",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "ETKİNLİK YÖNETİM SİSTEMİ - DETAYLI UYGULAMA ALGORİTMASI.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of ETKİNLİK YÖNETİM SİSTEMİ - DETAYLI UYGULAMA ALGORİTMASI"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "c9e76bfe15810941",
+  "lastOpenFiles": [
+    "YÖNETİM PANELİ - DETAYLI ALGORİTMA.md",
+    "ETKİNLİK YÖNETİM SİSTEMİ - DETAYLI UYGULAMA ALGORİTMASI.md"
+  ]
+}
