@@ -39,6 +39,11 @@ public class ClubMembershipServiceImpl implements ClubMembershipService {
         Club club = clubRepository.findById(clubId)
                 .orElseThrow(() -> new RuntimeException("Kulüp bulunamadı: ID=" + clubId));
         
+        // Kulüp başkanı kontrolü
+        if (club.getPresident() == null) {
+            throw new RuntimeException("Bu kulübün henüz bir başkanı bulunmamaktadır. Üyelik isteği gönderilemedi.");
+        }
+        
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı: ID=" + userId));
         
@@ -70,7 +75,7 @@ public class ClubMembershipServiceImpl implements ClubMembershipService {
                 user.getName() + " kulübünüze katılmak istiyor",
                 "CLUB_MEMBERSHIP_REQUEST",
                 clubId,
-                club.getPresidentId(),
+                club.getPresident().getId(),
                 "{\"requestId\":" + savedRequest.getId() + ",\"clubId\":" + clubId + "}"
         );
         

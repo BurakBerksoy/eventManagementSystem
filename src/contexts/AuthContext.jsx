@@ -1,6 +1,11 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
-import { login as loginService, logout as logoutService, getCurrentUser as getUserService, register as registerService } from '../services/userService';
+import { 
+  login as loginService, 
+  logout as logoutService, 
+  getCurrentUser as getUserService, 
+  register as registerService 
+} from '../services/userService';
 
 const AuthContext = createContext();
 
@@ -98,115 +103,136 @@ export function AuthProvider({ children }) {
     checkAuth();
   }, []);
 
-  const login = async (username, password) => {
-    try {
-      console.log('Login işlemi başlatılıyor...');
-      setAuthError(null);
+  // global token expiry event listener ekle
+  useEffect(() => {
+    // API.js'ten gelen oturum sonlandırma eventini dinle
+    const handleLogoutEvent = (event) => {
+      console.log('Oturum sonlandırma eventi alındı:', event.detail);
       
-      // Form kontrolü
-      if (!username || !password) {
-        const errorMsg = 'E-posta ve şifre alanları doldurulmalıdır';
-        setAuthError(errorMsg);
-        return { success: false, message: errorMsg };
-      }
-      
-      // Login servisini çağır
-      const result = await loginService(username, password);
-      
-      if (!result.success) {
-        console.error('Login başarısız:', result.message);
-        setAuthError(result.message);
+      // Sadece oturum açıksa işlem yap
+      if (isAuthenticated && currentUser) {
+        console.log('Event sonucu oturum sonlandırılıyor');
         
-        // Backend'den gelen hata mesajlarını kontrol et ve daha anlamlı hata mesajları döndür
-        const errorMsg = result.message || 'Giriş yapılırken bir hata oluştu';
-        return { success: false, message: errorMsg };
+        // State'i güncelle
+        setIsAuthenticated(false);
+        setCurrentUser(null);
+        setLoading(false);
+        setAuthError(null);
+        
+        // Local storage temizliği ve bilgilendirme eventi
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user');
       }
+    };
+    
+    // Event listener ekle
+    window.addEventListener('auth:logout', handleLogoutEvent);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('auth:logout', handleLogoutEvent);
+    };
+  }, [isAuthenticated, currentUser]);
+
+  const login = async (email, password) => {
+    try {
+      console.log(`${email} için giriş denemesi yapılıyor...`);
+      const result = await loginService(email, password);
       
-      console.log('Login başarılı, kullanıcı bilgisi alınıyor...');
-      
-      // Token'ı localStorage'a kaydet
-      const token = result.token || result.data?.token;
-      if (token) {
-        localStorage.setItem('auth_token', token);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      }
-      
-      // Kullanıcı bilgilerini oluştur
-      let userData;
-      
-      // Login yanıtı içinde kullanıcı bilgisi varsa direkt kullan
-      if (result.data?.user || result.data?.id || result.data?.email) {
-        userData = result.data.user || result.data;
-      } else {
-        // Kullanıcı bilgilerini getir - login içinde yetkilendirme bilgisi yoksa
-        const userResponse = await getCurrentUser();
-        if (!userResponse) {
-          console.error('Login sonrası kullanıcı bilgisi alınamadı');
-          localStorage.removeItem('auth_token');
-          setAuthError('Kullanıcı bilgisi alınamadı');
-          return { success: false, message: 'Kullanıcı bilgisi alınamadı' };
+      if (result.success) {
+        console.log('Login sonucu:', result);
+        
+        // Token ve kullanıcı bilgilerini kaydet
+        setToken(result.token);
+        console.log('Token ayarlandı:', result.token.substring(0, 10) + '...');
+        
+        // Kullanıcı bilgisini API'den al
+        console.log('Kullanıcı bilgisi alınıyor...');
+        const user = await getUserInfo();
+        
+        if (user) {
+          const userData = user.userData || user;
+          setCurrentUser(userData);
+          setUser(userData);
+          setIsAuthenticated(true);
+          
+          // LocalStorage'a kaydet
+          localStorage.setItem('user', JSON.stringify(userData));
+          
+          console.log('Login başarılı, kullanıcı bilgileri alındı ve kaydedildi');
+          return { success: true };
+        } else {
+          console.log('Token geçerli ancak kullanıcı bilgileri alınamadı:', user);
+          
+          // API'den kullanıcı bilgisi alınamadıysa token içinden çıkar
+          try {
+            const tokenParts = result.token.split('.');
+            if (tokenParts.length === 3) {
+              // JWT Token'dan kullanıcı bilgilerini çıkar
+              const payload = JSON.parse(atob(tokenParts[1]));
+              const extractedUser = {
+                id: payload.id || payload.sub,
+                name: payload.name,
+                email: payload.sub,
+                role: payload.role
+              };
+              
+              setCurrentUser(extractedUser);
+              setUser(extractedUser);
+              localStorage.setItem('user', JSON.stringify(extractedUser));
+              setIsAuthenticated(true);
+              
+              console.log('Kullanıcı bilgileri token payload\'ından çıkarıldı:', extractedUser);
+              return { success: true };
+            }
+          } catch (parseError) {
+            console.error('Token parse hatası:', parseError);
+          }
+          
+          // Token payload'ından da bilgi alınamadıysa hata döndür
+          return { success: false, error: 'Kullanıcı bilgileri doğrulanamadı' };
         }
-        userData = userResponse;
+      } else {
+        console.error('Login hatası:', result.error);
+        setIsAuthenticated(false);
+        setCurrentUser(null);
+        setUser(null);
+        return { success: false, error: result.error };
       }
-      
-      // Kullanıcı state'ini güncelle
-      setCurrentUser(userData);
-      setUser(userData); // Backward compatibility için
-      setIsAuthenticated(true);
-      
-      // localStorage'a kullanıcı bilgilerini kaydet
-      localStorage.setItem('user', JSON.stringify(userData));
-      
-      console.log('Kullanıcı girişi tamamlandı. Etkinlikler sayfasına yönlendiriliyor:', userData);
-      
-      return { success: true, user: userData };
     } catch (error) {
       console.error('Login hatası:', error);
-      
-      // Hata mesajını belirle
-      let errorMessage = 'Giriş yapılırken bir hata oluştu';
-      
-      if (error.response) {
-        // HTTP durum koduna göre hata mesajları
-        if (error.response.status === 401) {
-          errorMessage = 'Geçersiz e-posta veya şifre';
-        } else if (error.response.status === 403) {
-          errorMessage = 'Giriş bilgileri doğrulanamadı. Lütfen e-posta ve şifrenizi kontrol edin.';
-        } else if (error.response.data && error.response.data.message) {
-          errorMessage = error.response.data.message;
-        }
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
-      setAuthError(errorMessage);
-      return { success: false, message: errorMessage };
+      setIsAuthenticated(false);
+      setCurrentUser(null);
+      setUser(null);
+      return { success: false, error: 'Giriş yapılırken bir hata oluştu' };
     }
   };
 
-  const logout = async () => {
+  const logout = () => {
     try {
       console.log('Çıkış yapılıyor...');
-      await logoutService();
+      
+      // Tüm oturum verilerini sil
       localStorage.removeItem('auth_token');
       localStorage.removeItem('user');
+      localStorage.removeItem('userData');
+      
+      // API header'larındaki token'ı temizle
       delete axios.defaults.headers.common['Authorization'];
+      
+      // State'i sıfırla
       setCurrentUser(null);
-      setUser(null);
       setIsAuthenticated(false);
+      setLoading(false);
       setAuthError(null);
-      return true;
+      
+      console.log('Çıkış başarılı, tüm oturum verileri temizlendi');
+      
+      // Başarılı mesajı döndür
+      return { success: true, message: 'Başarıyla çıkış yapıldı' };
     } catch (error) {
-      console.error('Logout hatası:', error);
-      // Hata olsa da kullanıcı çıkış yapmış sayılır
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('user');
-      delete axios.defaults.headers.common['Authorization'];
-      setCurrentUser(null);
-      setUser(null);
-      setIsAuthenticated(false);
-      setAuthError(null);
-      return false;
+      console.error('Çıkış yaparken hata:', error);
+      return { success: false, message: 'Çıkış yaparken bir hata oluştu' };
     }
   };
 
@@ -227,26 +253,34 @@ export function AuthProvider({ children }) {
       // API'den kullanıcı bilgisini al
       const result = await getUserService();
       
+      // API yanıtını kontrol et
       if (!result.success) {
         console.error('Kullanıcı bilgisi alınamadı:', result.error);
+        
+        // Oturum bilgilerini temizle
         localStorage.removeItem('auth_token');
         localStorage.removeItem('user');
         delete axios.defaults.headers.common['Authorization'];
         setCurrentUser(null);
         setUser(null);
         setIsAuthenticated(false);
+        
         return null;
       }
       
+      // Kullanıcı bilgilerini al
       const userData = result.data;
       if (!userData) {
         console.error('API yanıtı userData içermiyor');
+        
+        // Oturum bilgilerini temizle
         localStorage.removeItem('auth_token');
         localStorage.removeItem('user');
         delete axios.defaults.headers.common['Authorization'];
         setCurrentUser(null);
         setUser(null);
         setIsAuthenticated(false);
+        
         return null;
       }
       
@@ -261,12 +295,15 @@ export function AuthProvider({ children }) {
       return userData;
     } catch (error) {
       console.error('Kullanıcı bilgisi alınamadı (hata):', error);
+      
+      // Hata durumunda oturum bilgilerini temizle
       localStorage.removeItem('auth_token');
       localStorage.removeItem('user');
       delete axios.defaults.headers.common['Authorization'];
       setCurrentUser(null);
       setUser(null);
       setIsAuthenticated(false);
+      
       return null;
     }
   };
@@ -318,6 +355,29 @@ export function AuthProvider({ children }) {
       const errorMessage = error.message || 'Kayıt yapılırken bir hata oluştu';
       setAuthError(errorMessage);
       return { success: false, message: errorMessage };
+    }
+  };
+
+  // Token ayarlama yardımcı fonksiyonu
+  const setToken = (token) => {
+    if (!token) return;
+    
+    // Token'ı localStorage'a kaydet
+    localStorage.setItem('auth_token', token);
+    
+    // Axios headers'a ekle
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  };
+
+  // Kullanıcı bilgilerini getirme yardımcı fonksiyonu
+  const getUserInfo = async () => {
+    try {
+      // API'den kullanıcı bilgisini al
+      const userData = await getCurrentUser();
+      return userData;
+    } catch (error) {
+      console.error('getUserInfo hatası:', error);
+      return null;
     }
   };
 

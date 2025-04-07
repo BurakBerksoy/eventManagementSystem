@@ -24,6 +24,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import EventIcon from '@mui/icons-material/Event';
 import SchoolIcon from '@mui/icons-material/School';
+import { toast } from 'react-hot-toast';
 
 // Animasyon varyantları
 const containerVariants = {
@@ -80,7 +81,7 @@ const fadeInOutVariants = {
 };
 
 const Login = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -102,55 +103,46 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Form doğrulama - boş alanlar
-    if (!username.trim() || !password.trim()) {
-      setError("Kullanıcı adı ve şifre alanlarını doldurunuz");
-      setLoading(false);
-      return;
-    }
+    setLoading(true);
+    setError('');
     
     try {
-      setError("");
-      setLoading(true);
+      console.log('Giriş deneniyor:', email);
       
-      console.log("Giriş deneniyor:", username);
-      const response = await login(username, password);
-      
-      console.log("Login yanıtı:", response);
-      
-      // Başarısız yanıt kontrolü
-      if (response && response.success === false) {
-        setError(response.message || "Giriş başarısız oldu");
+      // Email/password kontrolü
+      if (!email || !email.trim()) {
+        setError('E-posta adresi giriniz');
         setLoading(false);
         return;
       }
       
-      // Başarılı giriş - etkinlikler sayfasına yönlendir
-      console.log("Giriş başarılı, etkinlikler sayfasına yönlendiriliyor");
-      navigate("/events");
-    } catch (error) {
-      console.error("Giriş hatası:", error);
-      
-      // Hata mesajı oluştur
-      let errorMessage = error.message || "Giriş yapılırken bir hata oluştu";
-      
-      // Login API'sinden gelen net mesajları kullan
-      if (error.isLoginError) {
-        errorMessage = error.message;
-      } else if (error.response) {
-        const status = error.response.status;
-        
-        if (status === 401) {
-          errorMessage = "Kullanıcı adı veya şifre hatalı";
-        } else if (status === 403) {
-          errorMessage = "Giriş yapma yetkiniz yok";
-        } else if (error.response.data?.message) {
-          errorMessage = error.response.data.message;
-        }
+      if (!password || !password.trim()) {
+        setError('Şifre giriniz');
+        setLoading(false);
+        return;
       }
       
-      setError(errorMessage);
+      // AuthContext içindeki login fonksiyonu kullan
+      const result = await login(email, password);
+      console.log('Login yanıtı:', result);
+      
+      if (result && result.success) {
+        toast.success('Giriş başarılı!');
+        console.log('Giriş başarılı, etkinlikler sayfasına yönlendiriliyor');
+        
+        // Yönlendirmeyi gerçekleştir
+        navigate('/events');
+      } else {
+        // Hata mesajını göster
+        const errorMessage = result?.error || 'Giriş yapılamadı. Lütfen tekrar deneyin.';
+        console.error('Giriş hatası:', errorMessage);
+        setError(errorMessage);
+        toast.error(errorMessage);
+      }
+    } catch (error) {
+      console.error('Giriş sırasında beklenmeyen hata:', error);
+      setError('Bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
+      toast.error('Giriş sırasında bir hata oluştu');
     } finally {
       setLoading(false);
     }
@@ -364,12 +356,12 @@ const Login = () => {
                 onSubmit={handleSubmit}
               >
                 <TextField
-                  label="Kullanıcı Adı"
+                  label="E-posta"
                   variant="outlined"
                   fullWidth
                   margin="normal"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                   InputProps={{
                     startAdornment: (

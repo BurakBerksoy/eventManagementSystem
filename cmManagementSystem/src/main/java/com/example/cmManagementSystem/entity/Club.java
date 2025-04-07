@@ -169,7 +169,14 @@ public class Club {
      * @return Kulüp başkanının ID'si
      */
     public Long getPresidentId() {
-        return president != null ? president.getId() : null;
+        if (president == null) {
+            System.out.println("UYARI: Club ID=" + this.id + " için president null. getPresidentId() null dönüyor.");
+            return null;
+        }
+        
+        Long presidentId = president.getId();
+        System.out.println("Bilgi: Club ID=" + this.id + " için presidentId=" + presidentId);
+        return presidentId;
     }
 
     /**

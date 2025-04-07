@@ -1,108 +1,156 @@
 import { api } from './api';
+import { API_URL, API_ENDPOINTS } from '../config/config';
 
 /**
  * Kullanıcı işlemleri ile ilgili servis
  */
 
 /**
- * Kullanıcı girişi işlemi
- * Spring Boot Security format ile çalışır
- * @param {string} username Kullanıcı adı/email
- * @param {string} password Şifre
- * @returns {Promise<object>} Kullanıcı bilgileri ve token
+ * Kullanıcı girişi yapar
+ * @param {string} email Kullanıcı e-posta adresi
+ * @param {string} password Kullanıcı şifresi
+ * @returns {Promise<object>} Giriş sonucu
  */
-export const login = async (username, password) => {
+export const login = async (email, password) => {
   try {
-    // AuthRequest DTO'suna uygun format
-    const loginData = {
-      email: username, // username parametresini email olarak kullan
-      password: password
-    };
-
-    console.log('Login isteği gönderiliyor:', username);
+    console.log('Login isteği gönderiliyor:', email);
     
-    // AuthController'ın beklediği endpoint: /auth/login
-    const response = await api.post('/auth/login', loginData);
+    const endpoint = `${API_URL}/auth/login`;
+    console.log('Login isteği gönderiliyor:', endpoint);
     
-    console.log('Login başarılı:', response);
+    // API isteği - axios yerine fetch kullanıyoruz daha güvenilir olması için
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password })
+    });
     
-    return response;
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Login hatası: ${response.status}`, errorText);
+      
+      let errorMessage = 'Giriş yapılamadı';
+      try {
+        // Error yanıtı JSON içeriyor mu kontrol et
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.message || errorData.error || 'Giriş yapılamadı';
+        }
+      } catch (parseError) {
+        console.warn('Hata yanıtı parse edilemedi:', parseError);
+      }
+      
+      return { success: false, error: errorMessage };
+    }
+    
+    // Başarılı yanıt
+    try {
+      const responseData = await response.json();
+      console.log('Login yanıtı alındı:', responseData);
+      
+      let token = null;
+      
+      // Token yapısını kontrol et - backend farklı alanlarda dönebilir
+      if (responseData.accessToken) {
+        console.log('Token accessToken olarak bulundu');
+        token = responseData.accessToken;
+      } else if (responseData.token) {
+        console.log('Token token olarak bulundu');
+        token = responseData.token;
+      } else if (responseData.data && responseData.data.token) {
+        console.log('Token data.token olarak bulundu');
+        token = responseData.data.token;
+      }
+      
+      if (!token) {
+        console.error('Token bulunamadı, yanıt:', responseData);
+        return { success: false, error: 'Token bilgisi bulunamadı' };
+      }
+      
+      // Token'ı localStorage'a kaydet
+      localStorage.setItem('auth_token', token);
+      
+      // Refresh token varsa kaydet
+      if (responseData.refreshToken) {
+        localStorage.setItem('refresh_token', responseData.refreshToken);
+      }
+      
+      // Kullanıcı bilgilerini localStorage'a kaydet
+      if (responseData.user) {
+        localStorage.setItem('user', JSON.stringify(responseData.user));
+      }
+      
+      console.log('Token header\'a eklendi ve localStorage\'a kaydedildi');
+      
+      return { 
+        success: true, 
+        token: token,
+        data: responseData.user || responseData.data || responseData 
+      };
+    } catch (parseError) {
+      console.error('Yanıt JSON parse hatası:', parseError);
+      return { success: false, error: 'Sunucu yanıtı işlenemedi' };
+    }
   } catch (error) {
-    console.error('Login hatası:', error);
-    
-    if (error.message && error.message.includes('btoa')) {
-      // btoa hatasını özel olarak işle (Türkçe karakter sorunu)
-      return {
-        success: false,
-        message: 'Kullanıcı adı veya şifrede desteklenmeyen karakterler var. Lütfen kontrol ediniz.'
-      };
-    }
-    
-    // Backend'den dönen hata mesajını incele ve anlamlı yanıt döndür
-    if (error.response) {
-      const status = error.response.status;
-      const errorData = error.response.data || {};
-      
-      if (status === 401) {
-        console.error('401 hatası: Yetkilendirme hatası');
-        return {
-          success: false,
-          message: errorData.message || 'Kullanıcı adı veya şifre hatalı'
-        };
-      }
-      
-      if (status === 403) {
-        console.error('403 hatası: Yetkilendirme hatası');
-        return {
-          success: false,
-          message: errorData.message || 'Giriş izniniz bulunmuyor'
-        };
-      }
-      
-      if (status === 404) {
-        console.error('404 hatası: API endpoint bulunamadı');
-        return {
-          success: false,
-          message: 'Giriş servisi bulunamadı'
-        };
-      }
-      
-      // Diğer HTTP hataları
-      return {
-        success: false,
-        message: errorData.message || `Sunucu hatası: ${status}`
-      };
-    }
-    
-    // Ağ hatası
-    if (error.request) {
-      console.error('Ağ hatası: Sunucuya erişilemiyor');
-      return {
-        success: false,
-        message: 'Sunucuya bağlanılamıyor. Spring Boot uygulamasının çalıştığından emin olun.'
-      };
-    }
-    
-    // Diğer hatalar
-    return {
-      success: false,
-      message: error.message || 'Bilinmeyen bir hata oluştu'
-    };
+    console.error('Login işlemi sırasında hata:', error);
+    return { success: false, error: error.message || 'Bağlantı hatası' };
   }
 };
 
 /**
- * Kullanıcı bilgilerini getir
+ * Kullanıcı profil bilgilerini getir
  * @returns {Promise<object>} Kullanıcı profil bilgileri
  */
 export const getUserProfile = async () => {
   try {
-    // Token doğrulama endpoint'i ile kullanıcı bilgilerini al
-    const response = await api.get('/auth/validate-token');
-    return response;
+    // Token kontrolü yap
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      console.log('Token bulunamadı, profil bilgisi alınamadı');
+      return { success: false, error: 'Oturum açılmamış' };
+    }
+    
+    // API isteği yap
+    const response = await fetch(`${API_URL}/api/users/profile`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+    
+    // Başarılı yanıt kontrolü
+    if (!response.ok) {
+      console.error(`Profil bilgisi alınamadı: ${response.status}`);
+      return { success: false, error: 'Profil bilgisi alınamadı' };
+    }
+    
+    // Yanıtı güvenli şekilde parse et
+    const responseText = await response.text();
+    
+    // HTML yanıtı kontrolü
+    if (responseText.trim().startsWith('<!DOCTYPE html>') || 
+        responseText.trim().startsWith('<html')) {
+      console.warn('HTML yanıtı alındı, JSON olarak ayrıştırılamaz');
+      return { success: false, error: 'Geçersiz yanıt formatı' };
+    }
+    
+    try {
+      // JSON olarak parse et
+      const profileData = JSON.parse(responseText);
+      console.log('Profil bilgisi başarıyla alındı');
+      return { success: true, data: profileData };
+    } catch (parseError) {
+      console.error('JSON parse hatası:', parseError);
+      return { success: false, error: 'Yanıt işlenemedi' };
+    }
   } catch (error) {
-    console.error('Kullanıcı profili getirme hatası:', error);
-    throw error;
+    console.error('getUserProfile hatası:', error);
+    return { success: false, error: error.message || 'Profil bilgisi alınırken hata oluştu' };
   }
 };
 
@@ -171,48 +219,181 @@ export const register = async (userData) => {
   }
 };
 
-// Çıkış yap
+/**
+ * Çıkış işlemini gerçekleştirir
+ * @returns {Promise<Object>} Çıkış işlem sonucu
+ */
 export const logout = async () => {
   try {
-    // Çıkış isteği gönder
-    await api.post('/api/auth/logout');
-    
-    // Token ve kullanıcı bilgilerini temizle
+    // Tüm yerel depolama verilerini temizle
     localStorage.removeItem('auth_token');
-    localStorage.removeItem('userData');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+    
+    // Varsa backend'e logout isteği gönder (opsiyonel)
+    try {
+      await fetch('/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    } catch (logoutApiError) {
+      // Backend logout hatası kritik değil, sadece log
+      console.warn('Logout API hatası (önemsiz):', logoutApiError);
+    }
     
     return { success: true };
   } catch (error) {
-    console.error('Logout hatası:', error);
-    
-    // Hataya rağmen yerel bilgileri temizle
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('userData');
-    
-    return { 
-      success: false, 
-      error: error.response?.data?.message || error.message || 'Çıkış işlemi sırasında bir hata oluştu' 
-    };
+    console.error('Logout sırasında hata:', error);
+    return { success: false, error: error.message };
   }
 };
 
-// Mevcut kullanıcı bilgilerini getir
-export const getCurrentUser = async () => {
+/**
+ * Token'ı doğrular ve kullanıcı bilgilerini alır
+ * @returns {Promise<Object>} Doğrulama sonucu
+ */
+export const validateToken = async () => {
   try {
-    // Token doğrulama endpoint'i ile kullanıcı bilgilerini al
-    const response = await api.get('/auth/validate-token');
+    const token = localStorage.getItem('auth_token');
     
-    if (!response) {
-      return { success: false, error: 'Kullanıcı bilgileri alınamadı' };
+    if (!token) {
+      return { success: false, message: 'Token bulunamadı' };
     }
     
-    return { success: true, data: response };
+    const response = await fetch('/auth/validate-token', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    if (response.ok) {
+      try {
+        const userData = await response.json();
+        
+        // Kullanıcı verilerini güncelle
+        localStorage.setItem('user', JSON.stringify(userData));
+        
+        return { success: true, data: userData };
+      } catch (parseError) {
+        console.error('Kullanıcı verileri parse hatası:', parseError);
+        return { success: false, error: 'Kullanıcı verileri işlenemedi' };
+      }
+    } else {
+      console.warn(`Token doğrulama hatası: ${response.status}`);
+      
+      // 401 veya 403 hatası - token geçersiz
+      if (response.status === 401 || response.status === 403) {
+        // Token'ı temizle
+        localStorage.removeItem('auth_token');
+        
+        // Yenileme token'ı varsa yenilemeyi dene
+        const refreshToken = localStorage.getItem('refresh_token');
+        if (refreshToken) {
+          console.log('Token yenileme deneniyor...');
+          try {
+            const refreshResponse = await fetch('/auth/refresh-token', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ refreshToken })
+            });
+            
+            if (refreshResponse.ok) {
+              const refreshData = await refreshResponse.json();
+              if (refreshData.accessToken) {
+                localStorage.setItem('auth_token', refreshData.accessToken);
+                console.log('Token başarıyla yenilendi');
+                
+                // Token yenilendi, tekrar validate et
+                return validateToken();
+              }
+            } else {
+              // Yenileme başarısız, refreshToken'ı da temizle
+              localStorage.removeItem('refresh_token');
+            }
+          } catch (refreshError) {
+            console.error('Token yenileme hatası:', refreshError);
+          }
+        }
+        
+        return { success: false, error: 'Oturum süresi dolmuş' };
+      }
+      
+      return { success: false, error: 'Token doğrulanamadı' };
+    }
   } catch (error) {
-    console.error('Kullanıcı bilgileri alınamadı:', error);
-    return { 
-      success: false, 
-      error: error.message || 'Kullanıcı bilgileri alınamadı' 
-    };
+    console.error('Token doğrulama sırasında hata:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Mevcut kullanıcı bilgilerini getir
+ * @returns {Promise<object>} Mevcut kullanıcı bilgileri
+ */
+export const getCurrentUser = async () => {
+  try {
+    // Token kontrolü yap
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      console.log('Token bulunamadı, kullanıcı bilgisi alınamadı');
+      return { success: false, error: 'Oturum açılmamış' };
+    }
+    
+    // API isteği yap
+    const response = await fetch(`${API_URL}/auth/validate-token`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    // Başarılı yanıt kontrolü
+    if (!response.ok) {
+      console.error(`Kullanıcı bilgisi alınamadı: ${response.status}`);
+      
+      if (response.status === 401 || response.status === 403) {
+        // Token geçersiz, temizle
+        localStorage.removeItem('auth_token');
+      }
+      
+      // Hata yanıtını döndür
+      return { success: false, error: 'Kullanıcı bilgisi alınamadı' };
+    }
+    
+    // Yanıtı güvenli şekilde parse et
+    const responseText = await response.text();
+    
+    // HTML yanıtı kontrolü
+    if (responseText.trim().startsWith('<!DOCTYPE html>') || 
+        responseText.trim().startsWith('<html')) {
+      console.warn('HTML yanıtı alındı, JSON olarak ayrıştırılamaz');
+      return { success: false, error: 'Geçersiz yanıt formatı' };
+    }
+    
+    try {
+      // JSON olarak parse et
+      const userData = JSON.parse(responseText);
+      
+      // Kullanıcı bilgilerini kontrol et
+      if (!userData || !userData.id) {
+        console.error('Geçersiz kullanıcı bilgisi:', userData);
+        return { success: false, error: 'Geçersiz kullanıcı bilgisi' };
+      }
+      
+      console.log('Kullanıcı bilgisi başarıyla alındı');
+      return { success: true, data: userData };
+    } catch (parseError) {
+      console.error('JSON parse hatası:', parseError);
+      return { success: false, error: 'Yanıt işlenemedi' };
+    }
+  } catch (error) {
+    console.error('getCurrentUser hatası:', error);
+    return { success: false, error: error.message || 'Kullanıcı bilgisi alınırken hata oluştu' };
   }
 };
 

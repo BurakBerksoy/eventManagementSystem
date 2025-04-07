@@ -41,10 +41,11 @@ import {
   MoreVert as MoreVertIcon
 } from '@mui/icons-material';
 
-import { notificationAPI, membershipAPI } from '../../services/api';
+import { notificationAPI, membershipAPI, api } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatDistance, format } from 'date-fns';
 import { tr } from 'date-fns/locale';
+import { toast } from 'react-hot-toast';
 
 /**
  * Bildirim Merkezi Bileşeni
@@ -94,56 +95,133 @@ const NotificationCenter = () => {
 
   // Bildirimleri yükle
   const fetchNotifications = async () => {
-    if (!currentUser || !notificationsEnabled) return;
-    
     setLoading(true);
+    console.log('Bildirimler getiriliyor...');
+    
     try {
+      // API servisinden bildirimleri getir
       const response = await notificationAPI.getNotifications();
+      console.log('Bildirimler yanıtı:', response);
+      
       if (response && response.data) {
-        setNotifications(response.data);
+        const notificationsData = response.data;
+        console.log(`${notificationsData.length} bildirim alındı`);
+        setNotifications(notificationsData);
         
-        // Okunmamış bildirimleri say
-        const unread = response.data.filter(n => !n.isRead).length;
-        setUnreadCount(unread);
+        // Okunmamış bildirimleri hesapla
+        const unreadCount = notificationsData.filter(n => !n.read).length;
+        console.log(`${unreadCount} okunmamış bildirim var`);
+        setUnreadCount(unreadCount);
+      } else {
+        console.error('Bildirim yanıtı beklenen formatta değil:', response);
+        setNotifications([]);
+        setUnreadCount(0);
       }
     } catch (error) {
-      // 403 hatası durumunda sessizce işle
-      if (error.response?.status === 403) {
-        console.log('Bildirimlere erişim yetkisi yok - sessizce ele alınıyor');
-        setNotificationsEnabled(false);
-      } else {
-        console.error('Bildirimler alınamadı:', error);
+      console.error('Bildirimler alınırken hata oluştu:', error);
+      
+      // Hata durumunda alternatif API çağrısı dene
+      try {
+        console.log('Alternatif bildirim endpoint denemesi yapılıyor...');
+        const response = await fetch('/api/notifications/all', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Alternatif bildirim sonuçları:', data);
+          setNotifications(data);
+          const unreadCount = data.filter(n => !n.read).length;
+          setUnreadCount(unreadCount);
+        } else {
+          console.error('Alternatif bildirim isteği başarısız:', response.status);
+          setNotifications([]);
+          setUnreadCount(0);
+        }
+      } catch (fallbackError) {
+        console.error('Alternatif bildirim isteği de başarısız oldu:', fallbackError);
+        setNotifications([]);
+        setUnreadCount(0);
       }
-      setNotifications([]);
-      setUnreadCount(0);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Bildirimleri formatlama yardımcı fonksiyonu
+  const formatNotifications = (notifications) => {
+    return notifications.map(notification => {
+      // data alanı string ise JSON olarak parse et
+      let parsedData = notification.data;
+      if (typeof notification.data === 'string') {
+        try {
+          parsedData = JSON.parse(notification.data);
+        } catch (e) {
+          console.error(`Bildirim verisi (ID: ${notification.id}) JSON olarak ayrıştırılamadı:`, e);
+          parsedData = {};
+        }
+      }
+      
+      // Dönüştürülmüş bildirimi döndür
+      return {
+        ...notification,
+        data: parsedData,
+        // Eksik alan varsa varsayılan değerler ekle
+        type: notification.type || 'INFO',
+        isRead: !!notification.isRead,
+        createdAt: notification.createdAt || new Date().toISOString(),
+        // Kulüp üyelik istekleri için entityId'yi clubId olarak ayarla
+        entityId: (notification.type === 'CLUB_MEMBERSHIP_REQUEST' && parsedData && parsedData.clubId) 
+          ? parsedData.clubId 
+          : notification.entityId
+      };
+    });
   };
 
   const fetchUnreadCount = async () => {
     if (!currentUser || !notificationsEnabled) return;
     
     try {
+      // Önce token'ı kontrol et
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        console.log('Token bulunamadı, bildirim sayısı alınamadı');
+        setUnreadCount(0);
+        return;
+      }
+      
+      console.log('Okunmamış bildirim sayısı alınıyor...');
       const response = await notificationAPI.getUnreadCount();
-      if (response && response.data !== undefined) {
+      console.log('Bildirim sayısı yanıtı:', response);
+      
+      if (response) {
+        let count = 0;
+        
         // API yanıtı bir obje ise ve data alanı varsa, data'daki değeri kullan
         if (typeof response.data === 'object' && response.data.data !== undefined) {
-          setUnreadCount(response.data.data);
+          count = response.data.data;
         } 
         // API direkt sayı dönüyorsa o sayıyı kullan
         else if (typeof response.data === 'number') {
-          setUnreadCount(response.data);
+          count = response.data;
         }
-        // Diğer durumlarda 0 olarak ayarla
-        else {
-          setUnreadCount(0);
+        // API {data: sayı} şeklinde dönüyorsa
+        else if (typeof response.data?.data === 'number') {
+          count = response.data.data;
         }
+        
+        setUnreadCount(count);
+        console.log(`Okunmamış bildirim sayısı: ${count}`);
       }
     } catch (error) {
       // 403 hatası durumunda sessizce işle
       if (error.response?.status === 403) {
         console.log('Bildirim sayısına erişim yetkisi yok - sessizce ele alınıyor');
+        setNotificationsEnabled(false);
+      } else if (error.response?.status === 401) {
+        console.log('401 hatası - oturum geçersiz, bildirimler devre dışı');
         setNotificationsEnabled(false);
       } else {
         console.error('Okunmamış bildirim sayısı alınamadı:', error);
@@ -218,27 +296,68 @@ const NotificationCenter = () => {
   const handleNotificationClick = async (notification) => {
     // Bildirimi okundu olarak işaretle
     if (!notification.isRead) {
-      await notificationAPI.markAsRead(notification.id);
-      
-      // Bildirimleri güncelle
-      setNotifications(notifications.map(n => {
-        if (n.id === notification.id) {
-          return { ...n, isRead: true };
-        }
-        return n;
-      }));
-      
-      // Okunmamış sayısını güncelle
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      try {
+        await notificationAPI.markAsRead(notification.id);
+        
+        // Bildirimleri güncelle
+        setNotifications(notifications.map(n => {
+          if (n.id === notification.id) {
+            return { ...n, isRead: true };
+          }
+          return n;
+        }));
+        
+        // Okunmamış sayısını güncelle
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      } catch (error) {
+        console.error('Bildirim okundu olarak işaretlenemedi:', error);
+      }
     }
     
+    // Bildirim verisi kontrolü
+    let notificationData = notification.data || {};
+    if (typeof notificationData === 'string') {
+      try {
+        notificationData = JSON.parse(notificationData);
+      } catch (e) {
+        console.error('Bildirim verisi parse edilemedi:', e);
+        notificationData = {};
+      }
+    }
+    
+    // Daha ayrıntılı log
+    console.log('Bildirime tıklandı. Tip:', notification.type);
+    console.log('Bildirim verisi:', notificationData);
+    console.log('Entity ID:', notification.entityId);
+    
     // Bildirim tipine göre yönlendirme yap
-    if (notification.type === 'MEMBERSHIP_REQUEST') {
-      navigate(`/clubs/${notification.relatedId}`);
+    if (notification.type === 'CLUB_MEMBERSHIP_REQUEST') {
+      // Üyelik isteği için clubId kullan - önce veri içinden sonra fallback olarak entityId'den
+      const clubId = notificationData.clubId || notification.entityId;
+      console.log('Üyelik isteği bildirimine tıklandı, kulüp sayfasına yönlendiriliyor. ClubId:', clubId);
+      navigate(`/clubs/${clubId}`);
     } else if (notification.type === 'MEMBERSHIP_APPROVED' || notification.type === 'MEMBERSHIP_REJECTED') {
-      navigate(`/clubs/${notification.relatedId}`);
+      navigate(`/clubs/${notification.entityId}`);
     } else if (notification.type === 'ROLE_CHANGED') {
-      navigate(`/clubs/${notification.relatedId}`);
+      navigate(`/clubs/${notification.entityId}`);
+    } else if (notification.type === 'CLUB') {
+      navigate(`/clubs/${notification.entityId}`);
+    } else if (notification.type === 'EVENT') {
+      navigate(`/events/${notification.entityId}`);
+    } else {
+      // Bilinmeyen bildirim tipi - en azından detayları göster
+      console.log('Bilinmeyen bildirim tipi:', notification.type);
+      // Detaylı bilgileri göstermeye yakın bir yönlendirme yap
+      if (notification.entityId) {
+        // entityType varsa, o türe göre yönlendir
+        if (notification.entityType === 'CLUB') {
+          navigate(`/clubs/${notification.entityId}`);
+        } else if (notification.entityType === 'EVENT') {
+          navigate(`/events/${notification.entityId}`);
+        } else if (notification.entityType === 'USER') {
+          navigate(`/users/${notification.entityId}`);
+        }
+      }
     }
     
     setOpen(false);
@@ -253,47 +372,93 @@ const NotificationCenter = () => {
   };
 
   // Üyelik isteklerini işle
-  const handleMembershipRequest = async (requestId, action) => {
+  const handleMembershipRequest = async (notification, action) => {
+    if (!notification) return;
+    
     setActionLoading(true);
     
     try {
-      if (action === 'approve') {
-        // İsteği onayla
-        await membershipAPI.approveRequest(requestId);
-        console.log(`Üyelik isteği onaylandı: ${requestId}`);
-        
-        // Bildirimleri güncelle
-        setSnackbar({
-          open: true,
-          message: 'Üyelik isteği başarıyla onaylandı',
-          severity: 'success'
-        });
-      } else if (action === 'reject') {
-        // İsteği reddet
-        await membershipAPI.rejectRequest(requestId);
-        console.log(`Üyelik isteği reddedildi: ${requestId}`);
-        
-        // Bildirimleri güncelle
-        setSnackbar({
-          open: true,
-          message: 'Üyelik isteği reddedildi',
-          severity: 'info'
-        });
+      // Bildirim verisi kontrolü ve parse
+      let notificationData = notification.data || {};
+      if (typeof notificationData === 'string') {
+        try {
+          notificationData = JSON.parse(notificationData);
+        } catch (e) {
+          console.error('Bildirim verisi parse edilemedi:', e);
+          toast.error('Bildirim verisi işlenemedi');
+          setActionLoading(false);
+          return;
+        }
       }
       
-      // Bildirimleri yeniden yükle
+      // İşlem detayları için log
+      console.log(`Üyelik işlemi: ${action}, Bildirim ID: ${notification.id}`);
+      console.log('İşlenecek bildirim verisi:', notificationData);
+      
+      // İstek ID ve kulüp ID bilgilerini al
+      const requestId = notificationData.requestId;
+      const clubId = notificationData.clubId || notification.entityId;
+      
+      if (!requestId || !clubId) {
+        console.error('İstek veya kulüp ID bulunamadı:', notificationData);
+        toast.error('İşlem için gerekli bilgiler eksik');
+        setActionLoading(false);
+        return;
+      }
+      
+      console.log(`Üyelik isteği işleniyor: requestId=${requestId}, clubId=${clubId}, action=${action}`);
+      
+      let result;
+      
+      if (action === 'approve') {
+        // Onaylama API'sini çağır
+        result = await membershipAPI.approveRequest(requestId);
+        if (result && result.success) {
+          toast.success('Üyelik isteği onaylandı');
+          console.log('Üyelik onaylandı, sonuç:', result);
+        } else {
+          throw new Error('Üyelik isteği onaylama işlemi başarısız');
+        }
+      } else if (action === 'reject') {
+        // Reddetme API'sini çağır
+        result = await membershipAPI.rejectRequest(requestId);
+        if (result && result.success) {
+          toast.success('Üyelik isteği reddedildi');
+          console.log('Üyelik reddedildi, sonuç:', result);
+        } else {
+          throw new Error('Üyelik isteği reddetme işlemi başarısız');
+        }
+      }
+      
+      // Bildirimi okundu olarak işaretle
+      await notificationAPI.markAsRead(notification.id);
+      
+      // Bildirimleri güncelle
+      setNotifications(prevNotifications => 
+        prevNotifications.map(n => {
+          if (n.id === notification.id) {
+            return { ...n, isRead: true, isProcessed: true };
+          }
+          return n;
+        })
+      );
+      
+      // Okunmamış sayısını güncelle
+      if (!notification.isRead) {
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+      
+      // Bildirimleri tekrar yükle
       fetchNotifications();
+      
+      // Aktif diyaloğu kapat
+      setActiveDialog(null);
+      
     } catch (error) {
-      console.error('Üyelik isteği işlenirken hata oluştu:', error);
-      setSnackbar({
-        open: true,
-        message: 'İşlem sırasında bir hata oluştu',
-        severity: 'error'
-      });
+      console.error('Üyelik isteği işlenirken hata:', error);
+      toast.error(`İşlem sırasında bir hata oluştu: ${error.message || 'Bilinmeyen hata'}`);
     } finally {
       setActionLoading(false);
-      setActiveDialog(null);
-      setSelectedNotification(null);
     }
   };
 
@@ -390,7 +555,7 @@ const NotificationCenter = () => {
         </Button>
         <Button 
           onClick={() => selectedNotification && handleMembershipRequest(
-            selectedNotification.data?.requestId, 
+            selectedNotification, 
             'reject'
           )} 
           color="error"
@@ -400,7 +565,7 @@ const NotificationCenter = () => {
         </Button>
         <Button 
           onClick={() => selectedNotification && handleMembershipRequest(
-            selectedNotification.data?.requestId, 
+            selectedNotification, 
             'approve'
           )} 
           color="primary"
@@ -496,54 +661,64 @@ const NotificationCenter = () => {
         <ListItemText
           primary={notification.title}
           secondary={
-            <React.Fragment>
-              <Typography variant="body2" component="span" color="text.primary">
+            <>
+              <Typography
+                component="span"
+                variant="body2"
+                color="textPrimary"
+              >
                 {notification.message}
               </Typography>
-              
-              {/* Üyelik isteği için onay/red butonları */}
-              {isClubMembershipRequest && notificationData.requestId && (
-                <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
-                  <Button
-                    size="small"
-                    variant="contained"
-                    color="success"
-                    startIcon={<CheckIcon />}
-                    onClick={() => onAction(notificationData.requestId, 'approve')}
-                    disabled={actionLoading}
-                  >
-                    Onayla
-                  </Button>
-                  <Button
-                    size="small"
-                    variant="contained"
-                    color="error"
-                    startIcon={<CloseIcon />}
-                    onClick={() => onAction(notificationData.requestId, 'reject')}
-                    disabled={actionLoading}
-                  >
-                    Reddet
-                  </Button>
-                </Box>
-              )}
-              
+              <br />
               <Typography
+                component="span"
                 variant="caption"
-                display="block"
-                color="text.secondary"
-                sx={{ mt: 0.5 }}
+                color="textSecondary"
               >
                 {formatDate(notification.createdAt)}
               </Typography>
-            </React.Fragment>
+              
+              {/* Üyelik isteği için onay/red butonları */}
+              {isClubMembershipRequest && !notification.isProcessed && (
+                <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
+                  <Button 
+                    size="small" 
+                    variant="outlined" 
+                    color="error"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAction(notification, 'reject');
+                    }}
+                  >
+                    Reddet
+                  </Button>
+                  <Button 
+                    size="small" 
+                    variant="contained" 
+                    color="primary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAction(notification, 'approve');
+                    }}
+                  >
+                    Onayla
+                  </Button>
+                </Box>
+              )}
+            </>
           }
+          onClick={() => handleNotificationClick(notification)}
+          sx={{ cursor: 'pointer' }}
         />
         
         <ListItemSecondaryAction>
           <IconButton 
             edge="end" 
-            aria-label="daha fazla"
-            onClick={(event) => handleMenuOpen(event, notification)}
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation(); // Listem Item tıklamasını durdur
+              handleMenuOpen(e, notification);
+            }}
           >
             <MoreVertIcon fontSize="small" />
           </IconButton>

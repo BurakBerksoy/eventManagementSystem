@@ -2,7 +2,9 @@ package com.example.cmManagementSystem.mapper;
 
 import com.example.cmManagementSystem.dto.ClubDto;
 import com.example.cmManagementSystem.entity.Club;
+import com.example.cmManagementSystem.entity.User;
 import com.example.cmManagementSystem.repository.ClubMembershipRepository;
+import com.example.cmManagementSystem.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -10,10 +12,12 @@ import org.springframework.stereotype.Component;
 public class ClubMapper {
     
     private final ClubMembershipRepository clubMembershipRepository;
+    private final UserRepository userRepository;
     
     @Autowired
-    public ClubMapper(ClubMembershipRepository clubMembershipRepository) {
+    public ClubMapper(ClubMembershipRepository clubMembershipRepository, UserRepository userRepository) {
         this.clubMembershipRepository = clubMembershipRepository;
+        this.userRepository = userRepository;
     }
     
     /**
@@ -80,6 +84,11 @@ public class ClubMapper {
         club.setCategory(clubDto.getCategory());
         club.setFoundationDate(clubDto.getFoundationDate());
         
+        // Başkan bilgisini ayarla
+        if (clubDto.getPresidentId() != null) {
+            userRepository.findById(clubDto.getPresidentId()).ifPresent(club::setPresident);
+        }
+        
         if (clubDto.getMaxMembers() != null) {
             club.setMaxMembers(clubDto.getMaxMembers());
         }
@@ -117,6 +126,11 @@ public class ClubMapper {
         
         if (clubDto.getLogo() != null) {
             club.setLogoUrl(clubDto.getLogo());
+        }
+        
+        // Başkan bilgisini güncelle
+        if (clubDto.getPresidentId() != null) {
+            userRepository.findById(clubDto.getPresidentId()).ifPresent(club::setPresident);
         }
         
         if (clubDto.getContactEmail() != null) {

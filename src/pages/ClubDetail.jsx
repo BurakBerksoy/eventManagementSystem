@@ -203,12 +203,22 @@ const ClubDetail = () => {
         if (currentUser) {
           try {
             const membershipResponse = await membershipAPI.checkMembership(id);
-            if (membershipResponse && membershipResponse.success) {
-              setMembershipStatus(membershipResponse.data);
+            
+            // Üyelik yanıtını ve içindeki veriyi güvenli şekilde kontrol et
+            if (membershipResponse && membershipResponse.success && membershipResponse.data) {
+              // membershipResponse.data doğru formatta geldi mi kontrol et
+              const memberData = membershipResponse.data;
+              
+              // Kullanıcı durum verilerini güvenli şekilde ayarla
+              setMembershipStatus({
+                isMember: memberData.isMember === true, 
+                isPending: memberData.isPending === true,
+                role: memberData.role || null
+              });
               
               // Eğer kullanıcı başkan veya yönetici ise, bekleyen üyelik isteklerini getir
-              if (membershipResponse.data.isMember && 
-                  (membershipResponse.data.role === 'PRESIDENT' || membershipResponse.data.role === 'MANAGER')) {
+              if (memberData.isMember === true && 
+                  (memberData.role === 'PRESIDENT' || memberData.role === 'MANAGER')) {
                 await fetchMembershipRequests();
               }
             } else {
